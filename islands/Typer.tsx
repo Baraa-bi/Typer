@@ -183,7 +183,7 @@ export default function Typer(props: TyperProps) {
       return (
         <div
           key={idx}
-          class={`text-3xl p-2 rounded col-span-1
+          class={`text-3xl p-2 rounded col-span-2 md:col-span-1
           ${
             state.typedWords[state.count * RENDERED_WORD_COUNT + idx]
               ? "text-green-500"
