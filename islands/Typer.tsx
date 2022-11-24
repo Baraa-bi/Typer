@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useReducer, useState } from "preact/hooks";
-import { Button } from "../components/Button.tsx";
 import useInterval from "../hooks/useInterval.ts";
 import IconRefresh from "https://deno.land/x/tabler_icons_tsx@0.0.1/tsx/refresh.tsx";
 interface TyperProps {
