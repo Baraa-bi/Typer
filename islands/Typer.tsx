@@ -117,6 +117,10 @@ export default function Typer(props: TyperProps) {
   const onKeyDown = (e: any) => {
     if (!state.shouldStartTimer) {
       dispatch({ type: ActionTypes.SET_SHOULD_START_TIMER, payload: true });
+      dispatch({
+        type: ActionTypes.SET_RESULT_INFO,
+        payload: INIT_STATE.result,
+      });
     }
     if (e.code === "Space") {
       dispatch({ type: ActionTypes.SET_TYPED_WORD, payload: "" });
