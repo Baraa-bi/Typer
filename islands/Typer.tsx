@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from "preact/hooks";
+import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import useInterval from "../hooks/useInterval.ts";
 import IconRefresh from "https://deno.land/x/tabler_icons_tsx@0.0.1/tsx/refresh.tsx";
 interface TyperProps {
@@ -85,6 +85,7 @@ const reducer = (state: IState, action: Action) => {
 };
 
 export default function Typer(props: TyperProps) {
+  const input = useRef<any>();
   const [state, dispatch] = useReducer(reducer, {
     ...INIT_STATE,
     words: props.words.slice(0, RENDERED_WORD_COUNT),
@@ -97,6 +98,7 @@ export default function Typer(props: TyperProps) {
           type: ActionTypes.SET_TIMER,
           payload: state.timer - 1,
         });
+      input?.current?.blur?.();
       dispatch({
         type: ActionTypes.INIT_STATE,
         payload: {
@@ -117,10 +119,6 @@ export default function Typer(props: TyperProps) {
   const onKeyDown = (e: any) => {
     if (!state.shouldStartTimer) {
       dispatch({ type: ActionTypes.SET_SHOULD_START_TIMER, payload: true });
-      dispatch({
-        type: ActionTypes.SET_RESULT_INFO,
-        payload: INIT_STATE.result,
-      });
     }
     if (e.code === "Space") {
       dispatch({ type: ActionTypes.SET_TYPED_WORD, payload: "" });
@@ -167,6 +165,7 @@ export default function Typer(props: TyperProps) {
           type: ActionTypes.SET_RESULT_INFO,
           payload: {
             ...state.result,
+            show: false,
             ...(isCorrectKey
               ? { correctKeyStrokes: state.result.correctKeyStrokes + 1 }
               : {
@@ -200,6 +199,7 @@ export default function Typer(props: TyperProps) {
       );
     });
   }, [state]);
+  console.log(state.result.show);
 
   return (
     <div>
@@ -209,6 +209,7 @@ export default function Typer(props: TyperProps) {
       <form class="flex items-center">
         <div class="relative w-full flex ">
           <input
+            ref={input}
             onKeyDown={onKeyDown}
             onInput={onInputChange}
             value={state.typedWord}
@@ -228,7 +229,7 @@ export default function Typer(props: TyperProps) {
         </div>
       </form>
 
-      {state.result.show && (
+      {!!state.result.show && (
         <div class="bg-gray-100 p-4 mt-8 max-w-sm rounded">
           <div class="w-full bg-white border rounded-lg shadow-md sm:p-6 dark:bg-gray-800 dark:border-gray-700">
             <h5 class="mb-3 text-base font-semibold text-gray-900 md:text-xl dark:text-white">
