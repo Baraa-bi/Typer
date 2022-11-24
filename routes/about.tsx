@@ -1,4 +1,4 @@
-export default function AboutPage() {
+export default function AboutPageGreet() {
   return (
     <main>
       <h1>About</h1>
