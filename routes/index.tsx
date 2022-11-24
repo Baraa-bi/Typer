@@ -1,24 +1,238 @@
 import { Head } from "$fresh/runtime.ts";
-import Counter from "../islands/Counter.tsx";
+import {
+  HandlerContext,
+  PageProps,
+} from "https://deno.land/x/fresh@1.1.2/server.ts";
+import Footer from "../components/Footer.tsx";
+import Header from "../components/Header.tsx";
+import Typer from "../islands/Typer.tsx";
 
-export default function Home() {
+export default function Home(props: PageProps) {
+  const { words } = props.data;
   return (
     <>
       <Head>
-        <title>Fresh App</title>
+        <title>Typer</title>
       </Head>
-      <div class="p-4 mx-auto max-w-screen-md">
-        <img
-          src="/logo.svg"
-          class="w-32 h-32"
-          alt="the fresh logo: a sliced lemon dripping with juice"
-        />
-        <p class="my-6">
-          Welcome to `fresh`. Try updating this message in the ./routes/index.tsx
-          file, and refresh. im baraa
-        </p>
-        <Counter start={3} />
+      <div class="mx-auto max-w-screen-lg h-screen flex flex-col items-between px-8">
+        <Header active={props.route} /> 
+        <div class="flex-1 flex-col">
+          <Typer words={words} />
+        </div>
+        <Footer />
       </div>
     </>
   );
 }
+
+export const handler = (_req: Request, _ctx: HandlerContext) => {
+  const words: Array<string> = [
+    "the",
+    "be",
+    "of",
+    "and",
+    "a",
+    "to",
+    "in",
+    "he",
+    "have",
+    "it",
+    "that",
+    "for",
+    "they",
+    "I",
+    "with",
+    "as",
+    "not",
+    "on",
+    "she",
+    "at",
+    "by",
+    "this",
+    "we",
+    "you",
+    "do",
+    "but",
+    "from",
+    "or",
+    "which",
+    "one",
+    "would",
+    "all",
+    "will",
+    "there",
+    "say",
+    "who",
+    "make",
+    "when",
+    "can",
+    "more",
+    "if",
+    "no",
+    "man",
+    "out",
+    "other",
+    "so",
+    "what",
+    "time",
+    "up",
+    "go",
+    "about",
+    "than",
+    "into",
+    "could",
+    "state",
+    "only",
+    "new",
+    "year",
+    "some",
+    "take",
+    "come",
+    "these",
+    "know",
+    "see",
+    "use",
+    "get",
+    "like",
+    "then",
+    "first",
+    "any",
+    "work",
+    "now",
+    "may",
+    "such",
+    "give",
+    "over",
+    "think",
+    "most",
+    "even",
+    "find",
+    "day",
+    "also",
+    "after",
+    "way",
+    "many",
+    "must",
+    "look",
+    "before",
+    "great",
+    "back",
+    "through",
+    "long",
+    "where",
+    "much",
+    "should",
+    "well",
+    "people",
+    "down",
+    "own",
+    "just",
+    "because",
+    "good",
+    "each",
+    "those",
+    "feel",
+    "seem",
+    "how",
+    "high",
+    "too",
+    "place",
+    "little",
+    "world",
+    "very",
+    "still",
+    "nation",
+    "hand",
+    "old",
+    "life",
+    "tell",
+    "write",
+    "become",
+    "here",
+    "show",
+    "house",
+    "both",
+    "between",
+    "need",
+    "mean",
+    "call",
+    "develop",
+    "under",
+    "last",
+    "right",
+    "move",
+    "thing",
+    "general",
+    "school",
+    "never",
+    "same",
+    "another",
+    "begin",
+    "while",
+    "number",
+    "part",
+    "turn",
+    "real",
+    "leave",
+    "might",
+    "want",
+    "point",
+    "form",
+    "off",
+    "child",
+    "few",
+    "small",
+    "since",
+    "against",
+    "ask",
+    "late",
+    "home",
+    "interest",
+    "large",
+    "person",
+    "end",
+    "open",
+    "public",
+    "follow",
+    "during",
+    "present",
+    "without",
+    "again",
+    "hold",
+    "govern",
+    "around",
+    "possible",
+    "head",
+    "consider",
+    "word",
+    "program",
+    "problem",
+    "however",
+    "lead",
+    "system",
+    "set",
+    "order",
+    "eye",
+    "plan",
+    "run",
+    "keep",
+    "face",
+    "fact",
+    "group",
+    "play",
+    "stand",
+    "increase",
+    "early",
+    "course",
+    "change",
+    "help",
+    "line",
+  ];
+
+  return _ctx.render({
+    words: words
+      .map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value),
+  });
+};
