@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useReducer, useState } from "preact/hooks";
 import { Button } from "../components/Button.tsx";
 import useInterval from "../hooks/useInterval.ts";
-
+import IconRefresh from "https://deno.land/x/tabler_icons_tsx@0.0.1/tsx/refresh.tsx";
 interface TyperProps {
   words: Array<string>;
 }
@@ -204,29 +204,25 @@ export default function Typer(props: TyperProps) {
         {renderWords}
       </div>
       <form class="flex items-center">
-        <div class="relative w-full">
+        <div class="relative w-full flex ">
           <input
-            autoFocus
-            type="text"
-            id="voice-search"
             onKeyDown={onKeyDown}
             onInput={onInputChange}
             value={state.typedWord}
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+            class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+            autoFocus
+            type="text"
           />
+          <a class="p-3.5 text-lg  font-medium text-black bg-gray-100 border border-gray-300 dark:focus:ring-gray-800">
+            {state.timer}
+          </a>
+          <a
+            href="/"
+            class="p-3.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            <IconRefresh />
+          </a>
         </div>
-        <a
-          href="/"
-          class="inline-flex items-center py-3.5 px-8 ml-2 text-sm font-medium text-white bg-indigo-700 rounded-lg border border-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
-        >
-          {state.timer}
-        </a>
-        <a
-          href="/"
-          class="inline-flex items-center py-3.5 px-8 ml-2 text-sm font-medium text-white bg-indigo-700 rounded-lg border border-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800"
-        >
-          Reset
-        </a>
       </form>
 
       {state.result.show && (
