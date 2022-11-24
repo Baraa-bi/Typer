@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
+import {
+  Ref,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "preact/hooks";
 import useInterval from "../hooks/useInterval.ts";
 import IconRefresh from "https://deno.land/x/tabler_icons_tsx@0.0.1/tsx/refresh.tsx";
 interface TyperProps {
@@ -40,23 +47,25 @@ const INIT_STATE = {
 interface IState {
   count: number;
   timer: number;
-  shouldStartTimer: boolean;
-  words: Array<string>;
-  wordIndex: number;
-  typedWords: Array<boolean>;
+  result: Result;
   typedWord: string;
-  result: {
-    show: boolean;
-    correctKeyStrokes: number;
-    wrongKeyStrokes: number;
-    correctWords: number;
-    wrongWords: number;
-  };
+  wordIndex: number;
+  words: Array<string>;
+  shouldStartTimer: boolean;
+  typedWords: Array<boolean>;
 }
 
 interface Action {
   type: string;
   payload?: any;
+}
+
+interface Result {
+  show: boolean;
+  wrongWords: number;
+  correctWords: number;
+  wrongKeyStrokes: number;
+  correctKeyStrokes: number;
 }
 
 const reducer = (state: IState, action: Action) => {
@@ -91,66 +100,82 @@ export default function Typer(props: TyperProps) {
     words: props.words.slice(0, RENDERED_WORD_COUNT),
   });
 
+  const setTimer = (timer: number) => {
+    dispatch({ type: ActionTypes.SET_TIMER, payload: timer });
+  };
+
+  const setResultInfo = (result: Result) => {
+    dispatch({ type: ActionTypes.SET_RESULT_INFO, payload: result });
+  };
+
+  const setShouldStartTimer = (showTimer: boolean) => {
+    dispatch({ type: ActionTypes.SET_SHOULD_START_TIMER, payload: showTimer });
+  };
+
+  const setTypedWord = (word: string) => {
+    dispatch({ type: ActionTypes.SET_TYPED_WORD, payload: word });
+  };
+
+  const setTypedWords = (words: Array<boolean>) => {
+    dispatch({ type: ActionTypes.SET_TYPED_WORDS, payload: words });
+  };
+
+  const setWordIndex = (index: number) => {
+    dispatch({ type: ActionTypes.SET_WORD_INDEX, payload: index });
+  };
+
+  const setWords = (words: Array<string>) => {
+    dispatch({ type: ActionTypes.SET_WORDS, payload: words });
+  };
+
+  const setCount = (count: number) => {
+    dispatch({ type: ActionTypes.SET_COUNT, payload: count });
+  };
+
+  const resetState = () => {
+    const words = props.words.slice(0, RENDERED_WORD_COUNT);
+    dispatch({
+      type: ActionTypes.INIT_STATE,
+      payload: { ...INIT_STATE, words },
+    });
+  };
+
   useInterval(
     () => {
-      if (state.timer)
-        return dispatch({
-          type: ActionTypes.SET_TIMER,
-          payload: state.timer - 1,
-        });
+      if (state.timer) return setTimer(state.timer - 1);
       input?.current?.blur?.();
-      dispatch({
-        type: ActionTypes.INIT_STATE,
-        payload: {
-          ...INIT_STATE,
-          words: props.words.slice(0, RENDERED_WORD_COUNT),
-        },
-      });
-      const correctWords = state.typedWords.filter((w) => w === true).length;
+      resetState();
+      const correctWords = state.typedWords.filter((w) => w).length;
       const wrongWords = state.typedWords.length - correctWords;
-      dispatch({
-        type: ActionTypes.SET_RESULT_INFO,
-        payload: { ...state.result, show: true, correctWords, wrongWords },
-      });
+      setResultInfo({ ...state.result, show: true, correctWords, wrongWords });
     },
     state.shouldStartTimer ? INTERVAL : null
   );
 
   const onKeyDown = (e: any) => {
-    if (!state.shouldStartTimer) {
-      dispatch({ type: ActionTypes.SET_SHOULD_START_TIMER, payload: true });
-    }
+    if (!state.shouldStartTimer) setShouldStartTimer(true);
+
     if (e.code === "Space") {
-      dispatch({ type: ActionTypes.SET_TYPED_WORD, payload: "" });
+      setTypedWord("");
       if (state.wordIndex === state.words.length - 1) {
         const newWords = [...state.typedWords];
         newWords[state.count * RENDERED_WORD_COUNT] =
           state.words[state.wordIndex] === state.typedWord;
-        dispatch({
-          type: ActionTypes.SET_TYPED_WORDS,
-          payload: newWords,
-        });
-        dispatch({
-          type: ActionTypes.SET_WORDS,
-          payload: props.words.slice(
+        setTypedWords(newWords);
+        setWords(
+          props.words.slice(
             (state.count + 1) * RENDERED_WORD_COUNT,
             (state.count + 2) * RENDERED_WORD_COUNT
-          ),
-        });
-        dispatch({ type: ActionTypes.SET_COUNT, payload: state.count + 1 });
-        return dispatch({ type: ActionTypes.SET_WORD_INDEX, payload: 0 });
+          )
+        );
+        setCount(state.count + 1);
+        return setWordIndex(0);
       }
       const newWords = [...state.typedWords];
       newWords[state.count * RENDERED_WORD_COUNT + state.wordIndex] =
         state.words[state.wordIndex] === state.typedWord;
-      dispatch({
-        type: ActionTypes.SET_TYPED_WORDS,
-        payload: newWords,
-      });
-      dispatch({
-        type: ActionTypes.SET_WORD_INDEX,
-        payload: state.wordIndex + 1,
-      });
+      setTypedWords(newWords);
+      setWordIndex(state.wordIndex + 1);
     }
   };
 
@@ -160,38 +185,31 @@ export default function Typer(props: TyperProps) {
         const isCorrectKey = state.words[state.wordIndex].startsWith(
           e.target.value
         );
-
-        dispatch({
-          type: ActionTypes.SET_RESULT_INFO,
-          payload: {
-            ...state.result,
-            show: false,
-            ...(isCorrectKey
-              ? { correctKeyStrokes: state.result.correctKeyStrokes + 1 }
-              : {
-                  wrongKeyStrokes: state.result.wrongKeyStrokes + 1,
-                }),
-          },
+        setResultInfo({
+          ...state.result,
+          show: false,
+          ...(isCorrectKey
+            ? { correctKeyStrokes: state.result.correctKeyStrokes + 1 }
+            : {
+                wrongKeyStrokes: state.result.wrongKeyStrokes + 1,
+              }),
         });
       }
-      dispatch({ type: ActionTypes.SET_TYPED_WORD, payload: e?.target?.value });
+      setTypedWord(e?.target?.value);
     }
   };
 
   const renderWords = useMemo(() => {
     return state.words.map((word: string, idx: number) => {
+      const wordValue =
+        state.typedWords[state.count * RENDERED_WORD_COUNT + idx];
       return (
         <div
           key={idx}
-          class={`text-3xl p-2 rounded col-span-2 md:col-span-1
-          ${
-            state.typedWords[state.count * RENDERED_WORD_COUNT + idx]
-              ? "text-green-500"
-              : state.typedWords[state.count * RENDERED_WORD_COUNT + idx] ===
-                false
-              ? "text-red-500"
-              : "text-black"
-          } 
+          class={`text-3xl font-medium py-2 rounded col-span-1
+          ${`text-${
+            wordValue ? "green" : wordValue === false ? "red" : "gray"
+          }-500`} 
           ${state.wordIndex === idx ? "bg-gray-100" : "bg-white"}`}
         >
           {word}
@@ -199,11 +217,10 @@ export default function Typer(props: TyperProps) {
       );
     });
   }, [state]);
-  console.log(state.result.show);
 
   return (
     <div>
-      <div class="bg-white grid grid-flow-row-dense grid-cols-8 grid-rows-2 gap-1 text-center rounded-lg drop-shadow-lg border border-gray-200 my-3 w-full p-4">
+      <div class="bg-white grid grid-flow-row-dense md:grid-cols-8 grid-cols-2 grid-rows-2 text-center rounded-lg drop-shadow-lg border border-gray-200 my-3 w-full p-4">
         {renderWords}
       </div>
       <form class="flex items-center">
@@ -213,11 +230,11 @@ export default function Typer(props: TyperProps) {
             onKeyDown={onKeyDown}
             onInput={onInputChange}
             value={state.typedWord}
-            class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+            class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-2xl font-medium rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
             autoFocus
             type="text"
           />
-          <a class="p-3.5 text-lg  font-medium text-black bg-gray-100 border border-gray-300 dark:focus:ring-gray-800">
+          <a class="p-3.5 text-lg w-16 text-center font-medium text-black bg-gray-100 border border-gray-300 dark:focus:ring-gray-800">
             {state.timer}
           </a>
           <a
@@ -231,7 +248,7 @@ export default function Typer(props: TyperProps) {
 
       {!!state.result.show && (
         <div class="bg-gray-100 p-4 mt-8 max-w-sm rounded">
-          <div class="w-full bg-white border rounded-lg shadow-md sm:p-6 dark:bg-gray-800 dark:border-gray-700">
+          <div class="w-full bg-white border rounded-lg shadow-md p-6 dark:bg-gray-800 dark:border-gray-700">
             <h5 class="mb-3 text-base font-semibold text-gray-900 md:text-xl dark:text-white">
               Your result
             </h5>
@@ -251,6 +268,22 @@ export default function Typer(props: TyperProps) {
                     {state.result.wrongKeyStrokes}){" "}
                     {state.result.wrongKeyStrokes +
                       state.result.correctKeyStrokes}
+                  </span>
+                </div>
+              </li>
+              <li>
+                <div class="flex items-center p-3 text-base font-bold text-yellow-900 rounded-lg bg-yellow-50 hover:bg-yellow-100 group hover:shadow dark:bg-yellow-600 dark:hover:bg-yellow-500 dark:text-white">
+                  <span class="flex-1 whitespace-nowrap">Accuracy</span>
+                  <span class="inline-flex items-center justify-center px-2 py-0.5 ml-3 text-xs font-medium text-black rounded dark:bg-yellow-700 dark:text-yellow-400">
+                    {parseFloat(
+                      `${
+                        (state.result.correctKeyStrokes /
+                          (state.result.wrongKeyStrokes +
+                            state.result.correctKeyStrokes)) *
+                        100
+                      }`
+                    ).toFixed(2)}
+                    %
                   </span>
                 </div>
               </li>
